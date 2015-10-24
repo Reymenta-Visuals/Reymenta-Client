@@ -87,6 +87,8 @@ private:
 	LoganRef					mLog;
 
 	void						loadShader(const fs::path &fragment_path);
+	void						loadShaderString(const string fs);
+	std::string					passthruvert;
 	gl::GlslProgRef				mProg;
 	gl::VboMeshRef				mMesh;
 	ci::vec4					mMouseCoord;

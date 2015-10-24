@@ -11,7 +11,10 @@ void ReymentaClientApp::setup()
 	mLog = Logan::create();
 	CI_LOG_V("reymenta setup");
 
-	loadShader(getAssetPath("default.fs"));
+	fs::path passthruVertFile;
+	passthruVertFile = getAssetPath("") / "default.fs";
+	passthruvert = loadString(loadFile(passthruVertFile));
+	loadShader(passthruVertFile);
 	string pathToStartupFile = (getAssetPath("") / "reymenta.jpg").string();
 	if (fs::exists(pathToStartupFile))
 	{
@@ -39,6 +42,7 @@ void ReymentaClientApp::setup()
 	{
 		mMouseCoord.z = event.getX();
 		mMouseCoord.w = getWindowHeight() - event.getY();
+		wsPing();
 	});
 	// set shader resolution uniform on resize (if shader has that uniform)
 	getWindow()->getSignalResize().connect([this]()
@@ -47,7 +51,9 @@ void ReymentaClientApp::setup()
 	});
 	// ws
 	clientConnected = false;
-	if (mParameterBag->mAreWebSocketsEnabledAtStartup) wsConnect();
+	if (mParameterBag->mAreWebSocketsEnabledAtStartup) {
+		wsConnect();
+	}
 	mPingTime = getElapsedSeconds();
 	// remoteImGui
 	ClientActive = false;
@@ -55,6 +61,24 @@ void ReymentaClientApp::setup()
 	FrameReceived = 0;
 	IsKeyFrame = false;
 	PrevPacketSize = 0;
+}
+void ReymentaClientApp::loadShaderString(const string fs)
+{
+	try
+	{	// load and compile our shader
+		mProg = gl::GlslProg::create(passthruvert.c_str(), fs.c_str());
+		mProg->uniform("iResolution", vec3(getWindowWidth(), getWindowHeight(), 0.0f));
+	}
+	catch (ci::gl::GlslProgCompileExc &exc)
+	{
+		CI_LOG_E( exc.what());
+		console() << "Error compiling shader: " << exc.what() << endl;
+	}
+	catch (ci::Exception &exc)
+	{
+		CI_LOG_E( exc.what());
+		console() << "Error loading shader: " << exc.what() << endl;
+	}
 }
 void ReymentaClientApp::loadShader(const fs::path &fragment_path)
 {
@@ -65,14 +89,15 @@ void ReymentaClientApp::loadShader(const fs::path &fragment_path)
 		// no exceptions occurred, so store the shader's path for reloading on keypress
 		//mCurrentShaderPath = fragment_path;
 		mProg->uniform("iResolution", vec3(getWindowWidth(), getWindowHeight(), 0.0f));
-
 	}
 	catch (ci::gl::GlslProgCompileExc &exc)
 	{
+		CI_LOG_E( exc.what());
 		console() << "Error compiling shader: " << exc.what() << endl;
 	}
 	catch (ci::Exception &exc)
 	{
+		CI_LOG_E( exc.what());
 		console() << "Error loading shader: " << exc.what() << endl;
 	}
 }
@@ -81,6 +106,30 @@ void ReymentaClientApp::update()
 	mProg->uniform("iGlobalTime", static_cast<float>(getElapsedSeconds()));
 	mProg->uniform("iMouse", mMouseCoord);
 	mProg->uniform("iChannel0", 0);
+
+	// imgui
+	Frame++;
+	// websockets
+	if (mParameterBag->mAreWebSocketsEnabledAtStartup)
+	{
+		if (mParameterBag->mIsWebSocketsServer)
+		{
+			mServer.poll();
+		}
+		else
+		{
+			if (clientConnected)
+			{
+				mClient.poll();
+			}
+		}
+	}
+
+	if (mParameterBag->newMsg) {
+		mParameterBag->newMsg = false;
+		CI_LOG_V(mParameterBag->mMsg);
+	}
+
 }
 
 void ReymentaClientApp::shutdown()
@@ -295,11 +344,13 @@ void ReymentaClientApp::wsConnect()
 				else if (msg.substr(0, 7) == "uniform")
 				{
 					// fragment shader from live coding
-
+					loadShaderString(msg);
 
 				}
 				else if (msg.substr(0, 7) == "#version")
 				{
+					// fragment shader from live coding
+					loadShaderString(msg);
 
 				}
 				else if (first == "I")

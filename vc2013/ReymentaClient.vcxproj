@@ -114,8 +114,13 @@
   <ItemGroup>
     <ResourceCompile Include="Resources.rc" />
   </ItemGroup>
-  <ItemGroup />
-  <ItemGroup />
+  <ItemGroup>
+    <None Include="..\assets\default.fs" />
+    <None Include="..\assets\default.vs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Xml Include="..\assets\Settings.xml" />
+  </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\include\Resources.h" />
     <ClInclude Include="..\..\..\blocks\Cinder-Hap2\src\HapSupport.h" />
