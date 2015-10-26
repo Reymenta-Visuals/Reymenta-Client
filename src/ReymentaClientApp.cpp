@@ -405,7 +405,6 @@ void ReymentaClientApp::wsConnect()
 		});
 		wsClientConnect();
 	}
-	mParameterBag->mAreWebSocketsEnabledAtStartup = true;
 	clientConnected = true;
 }
 void ReymentaClientApp::wsClientConnect()
