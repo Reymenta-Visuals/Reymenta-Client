@@ -88,9 +88,6 @@
     <Filter Include="Blocks\OSC\src\ip\win32">
       <UniqueIdentifier>{0B92A225-0AFC-4FE1-AFB6-3B10B8A119D5}</UniqueIdentifier>
     </Filter>
-    <Filter Include="assets">
-      <UniqueIdentifier>{9dc6e73e-5246-42ec-9b7c-c52ecad23b74}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\ReymentaClientApp.cpp">
@@ -400,18 +397,5 @@
     <ResourceCompile Include="Resources.rc">
       <Filter>Resource Files</Filter>
     </ResourceCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="..\assets\default.fs">
-      <Filter>assets</Filter>
-    </None>
-    <None Include="..\assets\default.vs">
-      <Filter>assets</Filter>
-    </None>
-  </ItemGroup>
-  <ItemGroup>
-    <Xml Include="..\assets\Settings.xml">
-      <Filter>assets</Filter>
-    </Xml>
   </ItemGroup>
 </Project>
